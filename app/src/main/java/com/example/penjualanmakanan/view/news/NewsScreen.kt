@@ -21,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.penjualanmakanan.utils.ArticleItem
+import com.example.penjualanmakanan.utils.Loading
 import com.example.penjualanmakanan.utils.SearchBar
 import com.example.penjualanmakanan.viewmodel.EverythingViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -34,7 +35,6 @@ fun NewScreen(
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
     val context = LocalContext.current as ComponentActivity
     context.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-
     SwipeRefresh(
         state = swipeRefreshState,
         onRefresh = {
@@ -64,7 +64,7 @@ fun NewScreen(
                     everythingNews.loadState.refresh is LoadState.Loading ||
                             everythingNews.loadState.append is LoadState.Loading -> {
                         item {
-                            CircularProgressIndicator()
+                           Loading()
                         }
                     }
 

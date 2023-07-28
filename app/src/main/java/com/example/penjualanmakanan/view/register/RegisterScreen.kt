@@ -46,6 +46,7 @@ import com.example.penjualanmakanan.navigation.Screen
 import com.example.penjualanmakanan.ui.theme.primaryColor
 import com.example.penjualanmakanan.ui.theme.secondaryColor
 import com.example.penjualanmakanan.utils.InputBoxShape
+import com.example.penjualanmakanan.utils.Loading
 import com.example.penjualanmakanan.utils.buttonColor
 import com.example.penjualanmakanan.utils.buttonModifier
 import com.example.penjualanmakanan.utils.textFieldColor
@@ -65,6 +66,8 @@ fun RegisterScreen(
     val state by authViewModel.state.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) Loading()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -185,6 +188,7 @@ fun RegisterScreen(
         Button(
             onClick = {
                 scope.launch {
+                    showDialog = true
                     authViewModel.getRegister(
                         namaLengkap = name,
                         password = password,
@@ -192,6 +196,7 @@ fun RegisterScreen(
                         telepon = phone
                     )
                     if (state.registerResult?.statusCode == 200){
+                        showDialog = false
                         Toast.makeText(context,state.registerResult?.message, Toast.LENGTH_LONG).show()
                         navHostController.navigate(route = Screen.Login.route)
                     }

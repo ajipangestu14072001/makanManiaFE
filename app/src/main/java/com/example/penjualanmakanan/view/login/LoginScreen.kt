@@ -54,6 +54,7 @@ import com.example.penjualanmakanan.ui.theme.primaryColor
 import com.example.penjualanmakanan.ui.theme.secondaryColor
 import com.example.penjualanmakanan.utils.DefaultSpacer
 import com.example.penjualanmakanan.utils.InputBoxShape
+import com.example.penjualanmakanan.utils.Loading
 import com.example.penjualanmakanan.utils.buttonColor
 import com.example.penjualanmakanan.utils.buttonModifier
 import com.example.penjualanmakanan.utils.textFieldColor
@@ -65,7 +66,7 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     navController: NavHostController,
     authViewModel: AuthViewModel = hiltViewModel()
-    ) {
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordOpen by remember { mutableStateOf(false) }
@@ -73,6 +74,8 @@ fun LoginScreen(
     val context = LocalContext.current
     val dataStore = DataStoreRepository(context)
     val state by authViewModel.state.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) Loading()
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -177,7 +180,7 @@ fun LoginScreen(
                     }
                 },
                 placeholder = {
-                    Text(text = "Password",  color = secondaryColor)
+                    Text(text = "Password", color = secondaryColor)
                 },
                 textStyle = TextStyle(
                     fontSize = 14.sp,
@@ -189,10 +192,15 @@ fun LoginScreen(
         Button(
             onClick = {
                 scope.launch {
+                    showDialog = true
                     authViewModel.getLogin(username = email, password = password)
-                    if (state.result != null){
-                      navController.navigate(Screen.Main.route)
-                        dataStore.saveTokenAndId(token = state.result?.data!!.accessToken, id = state.result?.data!!.id)
+                    if (state.result != null) {
+                        showDialog = false
+                        navController.navigate(Screen.Main.route)
+                        dataStore.saveTokenAndId(
+                            token = state.result?.data!!.accessToken,
+                            id = state.result?.data!!.id
+                        )
                     }
                 }
             },

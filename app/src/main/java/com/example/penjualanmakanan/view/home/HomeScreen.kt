@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +50,7 @@ import com.example.penjualanmakanan.utils.Constant.images
 import com.example.penjualanmakanan.utils.FoodItemList
 import com.example.penjualanmakanan.utils.ImageSlider
 import com.example.penjualanmakanan.utils.ListFood
+import com.example.penjualanmakanan.utils.Loading
 import com.example.penjualanmakanan.utils.ShimmerImage
 import com.example.penjualanmakanan.utils.buttonColor
 import com.example.penjualanmakanan.viewmodel.FoodViewModel
@@ -65,10 +67,12 @@ fun HomeScreen(
     val dataStore = DataStoreRepository(context)
     val token = dataStore.getToken.collectAsState(initial = "")
     val apiFoodItems by foodViewModel.apiFoodItems.observeAsState(emptyList())
-
+    val state by foodViewModel.state.collectAsState()
     LaunchedEffect(Unit){
         foodViewModel.getAllFood(token = "Bearer ${token.value.toString()}")
     }
+
+    if (state.isLoading) Loading()
 
     Scaffold(
         topBar = {

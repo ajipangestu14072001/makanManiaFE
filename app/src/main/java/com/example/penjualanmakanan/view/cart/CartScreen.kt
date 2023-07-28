@@ -75,6 +75,7 @@ import com.example.penjualanmakanan.utils.Chip
 import com.example.penjualanmakanan.utils.Constant
 import com.example.penjualanmakanan.utils.CustomCard
 import com.example.penjualanmakanan.utils.InputBoxShape
+import com.example.penjualanmakanan.utils.Loading
 import com.example.penjualanmakanan.utils.NoRippleTheme
 import com.example.penjualanmakanan.utils.buttonColor
 import com.example.penjualanmakanan.viewmodel.FoodViewModel
@@ -93,7 +94,8 @@ fun CartScreen(
     val scope = rememberCoroutineScope()
     val items = listOf("7feb418a-f59d-4f95-b651-32c97c73a5a6", "b0687f4b-c161-4cfd-b430-9306b0c9eca8")
     val selectedOptionState = remember { mutableStateOf(Constant.deliveryOptions[0]) }
-
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) Loading()
     CompositionLocalProvider(LocalRippleTheme provides NoRippleTheme) {
         Scaffold(
             topBar = {
@@ -523,8 +525,10 @@ fun CartScreen(
                         Button(
                             onClick = {
                                scope.launch {
+                                   showDialog = true
                                    foodViewModel.geyBuyFood(token = "Bearer ${token.value.toString()}", deliveryStatus = "In Progress", items = items)
                                    if (state.buyResult != null){
+                                       showDialog = false
                                        Toast.makeText(context, state.buyResult?.message, Toast.LENGTH_SHORT).show()
                                        navController.navigate(route = Screen.Main.route)
                                    }

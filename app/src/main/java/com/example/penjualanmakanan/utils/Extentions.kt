@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,10 +51,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -92,21 +95,31 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.DataSource
 import coil.request.ImageRequest
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.penjualanmakanan.R
 import com.example.penjualanmakanan.model.Article
 import com.example.penjualanmakanan.model.Border
 import com.example.penjualanmakanan.model.FoodItem
 import com.example.penjualanmakanan.model.MenuProfile
 import com.example.penjualanmakanan.model.Notification
+import com.example.penjualanmakanan.navigation.Screen
 import com.example.penjualanmakanan.ui.theme.primaryColor
 import com.example.penjualanmakanan.ui.theme.secondaryColor
 import com.example.penjualanmakanan.ui.theme.thirdColor
+import com.example.penjualanmakanan.view.register.CompleteRegister
 import com.example.penjualanmakanan.viewmodel.EverythingViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -324,8 +337,14 @@ fun FoodItemCard(foodItem: FoodItem) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OptionsItemStyle(item: MenuProfile) {
+fun OptionsItemStyle(
+    item: MenuProfile,
+    showSheet: Boolean = false,
+    onSheetDismiss: () -> Unit = {},
+    onItemClick: () -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .padding(vertical = 10.dp)
@@ -335,6 +354,11 @@ fun OptionsItemStyle(item: MenuProfile) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(enabled = true) {
+                    if (item.title == "Berkas Tambahan" && !showSheet) {
+                        onItemClick()
+                    }
+                }
                 .padding(all = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -382,6 +406,9 @@ fun OptionsItemStyle(item: MenuProfile) {
             }
 
         }
+    }
+    if (showSheet && item.title == "Berkas Tambahan") {
+        BottomSheet(onDismiss = onSheetDismiss)
     }
 }
 
@@ -780,6 +807,56 @@ fun CustomCard(
             )
         }
     }
+}
+
+@Composable
+fun Loading() {
+    var showDialog by remember { mutableStateOf(true) }
+    if (showDialog) {
+        Dialog(
+            onDismissRequest = { showDialog = false },
+            DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(100.dp)
+                    .background(White, shape = RoundedCornerShape(8.dp))
+            ) {
+
+                val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading))
+                val progress by animateLottieCompositionAsState(
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever
+                )
+
+                LottieAnimation(
+                    composition = composition,
+                    progress = progress,
+                    modifier = Modifier
+                        .size(170.dp)
+                        .padding(top = 10.dp)
+                )
+
+            }
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheet(onDismiss: () -> Unit) {
+    val modalBottomSheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(
+        onDismissRequest = { onDismiss() },
+        sheetState = modalBottomSheetState,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+    ) {
+        CompleteRegister()
+    }
+
 }
 
 

@@ -44,7 +44,7 @@ import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompleteRegister() {
+fun CompleteRegister(modifier: Modifier = Modifier) {
     var dateOfBirth by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     val suggestions = listOf("Laki-laki", "Perempuan")
@@ -70,7 +70,7 @@ fun CompleteRegister() {
 
         }
     )
-    Column() {
+    Column {
         Column(modifier = Modifier.padding(20.dp)) {
             TextField(
                 value = gender, onValueChange = { gender = it },
@@ -156,7 +156,6 @@ fun CompleteRegister() {
             colors = TextFieldDefaults.textFieldColor(),
             shape = InputBoxShape.medium,
             singleLine = true,
-            readOnly = true,
             placeholder = {
                 Text(text = "Tempat Lahir",  color = secondaryColor)
             },
@@ -170,7 +169,7 @@ fun CompleteRegister() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(top = 20.dp),
+                .padding(top = 20.dp, bottom = 20.dp),
             colors = TextFieldDefaults.textFieldColor(),
             shape = InputBoxShape.medium,
             singleLine = true,
@@ -180,5 +179,6 @@ fun CompleteRegister() {
 
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
         )
+
     }
 }

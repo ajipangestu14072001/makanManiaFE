@@ -1,13 +1,13 @@
 package com.example.penjualanmakanan.view.profile
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -33,24 +33,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import coil.compose.rememberAsyncImagePainter
 import com.example.penjualanmakanan.R
 import com.example.penjualanmakanan.navigation.Screen
 import com.example.penjualanmakanan.repository.DataStoreRepository
 import com.example.penjualanmakanan.ui.theme.primaryColor
 import com.example.penjualanmakanan.utils.Constant
+import com.example.penjualanmakanan.utils.Loading
 import com.example.penjualanmakanan.utils.OptionsItemStyle
 import com.example.penjualanmakanan.utils.ShimmerImage
 import com.example.penjualanmakanan.viewmodel.AuthViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
@@ -62,6 +61,8 @@ fun ProfileScreen(
     val context = LocalContext.current
     val dataStore = DataStoreRepository(context)
     val idProfile = dataStore.getUserId.collectAsState(initial = "")
+    if (state.isLoading) Loading()
+    var isSheetVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit){
         viewModel.getProfile(id = idProfile.value.toString())
@@ -117,9 +118,13 @@ fun ProfileScreen(
             )
             LazyColumn {
                 items(Constant.optionsList) { item ->
-                    OptionsItemStyle(item = item)
+                        OptionsItemStyle(
+                            item = item,
+                            showSheet = isSheetVisible,
+                            onSheetDismiss = { isSheetVisible = false },
+                            onItemClick = { isSheetVisible = true }
+                        )
                 }
-
             }
         }
         Spacer(modifier = Modifier.weight(1f))
