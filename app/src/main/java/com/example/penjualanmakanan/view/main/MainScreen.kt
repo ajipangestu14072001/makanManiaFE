@@ -65,7 +65,7 @@ fun MainScreen(navController: NavHostController) {
             val modifier = Modifier.padding(paddingValues = innerPadding)
             Crossfade(
                 modifier = modifier,
-                targetState = sectionState.value
+                targetState = sectionState.value, label = ""
             )
             { section ->
                 when (section) {
@@ -73,7 +73,7 @@ fun MainScreen(navController: NavHostController) {
                     HomeSection.Reels -> SearchScreen()
                     HomeSection.Add -> NewScreen()
                     HomeSection.Favorite -> MessagesScreen()
-                    HomeSection.Profile -> ProfileScreen()
+                    HomeSection.Profile -> ProfileScreen(navController = navController)
                 }
             }
         }

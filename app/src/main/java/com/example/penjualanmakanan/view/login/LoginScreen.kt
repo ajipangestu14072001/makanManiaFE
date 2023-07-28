@@ -192,7 +192,7 @@ fun LoginScreen(
                     authViewModel.getLogin(username = email, password = password)
                     if (state.result != null){
                       navController.navigate(Screen.Main.route)
-                        dataStore.saveToken(name = state.result?.data!!.accessToken)
+                        dataStore.saveTokenAndId(token = state.result?.data!!.accessToken, id = state.result?.data!!.id)
                     }
                 }
             },

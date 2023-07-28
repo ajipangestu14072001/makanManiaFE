@@ -1,5 +1,6 @@
 package com.example.penjualanmakanan.view.cart
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -40,14 +41,20 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -56,9 +63,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.penjualanmakanan.R
 import com.example.penjualanmakanan.navigation.Screen
+import com.example.penjualanmakanan.repository.DataStoreRepository
 import com.example.penjualanmakanan.ui.theme.primaryColor
 import com.example.penjualanmakanan.ui.theme.thirdColor
 import com.example.penjualanmakanan.utils.Chip
@@ -67,12 +77,23 @@ import com.example.penjualanmakanan.utils.CustomCard
 import com.example.penjualanmakanan.utils.InputBoxShape
 import com.example.penjualanmakanan.utils.NoRippleTheme
 import com.example.penjualanmakanan.utils.buttonColor
+import com.example.penjualanmakanan.viewmodel.FoodViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartScreen(navController: NavHostController) {
+fun CartScreen(
+    navController: NavHostController,
+    foodViewModel: FoodViewModel = hiltViewModel()
+) {
+    val state by foodViewModel.state.collectAsState()
+    val context = LocalContext.current
+    val dataStore = DataStoreRepository(context)
+    val token = dataStore.getToken.collectAsState(initial = "")
+    val scope = rememberCoroutineScope()
+    val items = listOf("7feb418a-f59d-4f95-b651-32c97c73a5a6", "b0687f4b-c161-4cfd-b430-9306b0c9eca8")
     val selectedOptionState = remember { mutableStateOf(Constant.deliveryOptions[0]) }
-    val scrollState = rememberScrollState()
+
     CompositionLocalProvider(LocalRippleTheme provides NoRippleTheme) {
         Scaffold(
             topBar = {
@@ -501,7 +522,13 @@ fun CartScreen(navController: NavHostController) {
                         }
                         Button(
                             onClick = {
-                                navController.navigate(Screen.Main.route)
+                               scope.launch {
+                                   foodViewModel.geyBuyFood(token = "Bearer ${token.value.toString()}", deliveryStatus = "In Progress", items = items)
+                                   if (state.buyResult != null){
+                                       Toast.makeText(context, state.buyResult?.message, Toast.LENGTH_SHORT).show()
+                                       navController.navigate(route = Screen.Main.route)
+                                   }
+                               }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

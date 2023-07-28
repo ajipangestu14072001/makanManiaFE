@@ -17,4 +17,8 @@ class AuthRepository @Inject constructor(
     suspend fun getRegister(registerRequest: RegisterRequest): RegisterResponse{
         return api.getRegister(registerRequest = registerRequest)
     }
+
+    suspend fun getProfile(id: String): RegisterResponse{
+        return api.getProfile(id = id)
+    }
 }

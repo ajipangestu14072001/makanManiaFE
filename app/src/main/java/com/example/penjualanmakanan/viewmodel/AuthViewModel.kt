@@ -52,4 +52,17 @@ class AuthViewModel @Inject constructor(
         setState { copy(isLoading = false, registerResult = read) }
     }
 
+    suspend fun getProfile(
+        id : String
+    ) = withContext(Dispatchers.Default){
+        setState { copy(isLoading = true) }
+        val read = try {
+            repository.getProfile(id = id)
+        } catch (e: HttpException) {
+            setState { copy(isLoading = false, error = e.message) }
+            return@withContext
+        }
+        setState { copy(isLoading = false, registerResult = read) }
+    }
+
 }

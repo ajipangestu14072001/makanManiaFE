@@ -18,6 +18,10 @@ import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,14 +29,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.penjualanmakanan.R
 import com.example.penjualanmakanan.navigation.Screen
+import com.example.penjualanmakanan.repository.DataStoreRepository
 import com.example.penjualanmakanan.ui.theme.primaryColor
 import com.example.penjualanmakanan.utils.Chip
 import com.example.penjualanmakanan.utils.Constant.deliveryOptions
@@ -44,12 +51,24 @@ import com.example.penjualanmakanan.utils.ImageSlider
 import com.example.penjualanmakanan.utils.ListFood
 import com.example.penjualanmakanan.utils.ShimmerImage
 import com.example.penjualanmakanan.utils.buttonColor
+import com.example.penjualanmakanan.viewmodel.FoodViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(
+    navController: NavHostController,
+    foodViewModel: FoodViewModel = hiltViewModel()
+    ) {
     val listState = rememberLazyListState()
     val selectedOptionState = remember { mutableStateOf(deliveryOptions[0]) }
+    val context = LocalContext.current
+    val dataStore = DataStoreRepository(context)
+    val token = dataStore.getToken.collectAsState(initial = "")
+    val apiFoodItems by foodViewModel.apiFoodItems.observeAsState(emptyList())
+
+    LaunchedEffect(Unit){
+        foodViewModel.getAllFood(token = "Bearer ${token.value.toString()}")
+    }
 
     Scaffold(
         topBar = {
@@ -221,7 +240,7 @@ fun HomeScreen(navController: NavHostController) {
                                 .padding(start = 16.dp, bottom = 2.dp)
                         )
 
-                        FoodItemList(foodItems = foodItems)
+                        FoodItemList(foodItems = apiFoodItems)
 
                         Text(
                             text = "Promo Sekitar Lokasimu",
@@ -243,8 +262,8 @@ fun HomeScreen(navController: NavHostController) {
                                 .padding(start = 16.dp, bottom = 10.dp, top = 16.dp)
                         )
                     }
-                    items(foodItems.size) { data ->
-                        ListFood(it = data)
+                    items(apiFoodItems) { data ->
+                        ListFood(foodItem = data)
                     }
 
                 }

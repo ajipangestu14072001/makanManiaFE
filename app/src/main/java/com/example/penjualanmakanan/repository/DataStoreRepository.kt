@@ -15,7 +15,10 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ma
 class DataStoreRepository(context: Context) {
     private object PreferencesKey {
         val USER_TOKEN_KEY = stringPreferencesKey("token")
+        val USER_ID_KEY = stringPreferencesKey("id")
     }
+    private val dataStore = context.dataStore
+
 
     val getToken: Flow<String?> = context.dataStore.data
         .map { preferences ->
@@ -23,10 +26,16 @@ class DataStoreRepository(context: Context) {
         }
 
 
-    private val dataStore = context.dataStore
-    suspend fun saveToken(name: String) {
+    val getUserId: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKey.USER_ID_KEY] ?: ""
+        }
+
+
+    suspend fun saveTokenAndId(token: String, id: String) {
         dataStore.edit { preferences ->
-            preferences[USER_TOKEN_KEY] = name
+            preferences[USER_TOKEN_KEY] = token
+            preferences[PreferencesKey.USER_ID_KEY] = id
         }
     }
 }

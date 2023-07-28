@@ -287,13 +287,21 @@ fun FoodItemCard(foodItem: FoodItem) {
         ShimmerImage(
             imageUrl = foodItem.imageUrl,
             placeholderResId = R.drawable.image_not_available,
+            border = Border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
             modifier = Modifier
                 .size(150.dp)
                 .clip(RoundedCornerShape(8.dp))
         )
 
         Spacer(modifier = Modifier.height(6.dp))
-        Text(text = foodItem.name, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text(
+            modifier = Modifier.width(150.dp),
+            text = foodItem.name,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
 
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -467,7 +475,7 @@ fun SearchBar(
 }
 
 @Composable
-fun ListFood(it: Int) {
+fun ListFood(foodItem: FoodItem) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -479,10 +487,14 @@ fun ListFood(it: Int) {
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.Top
         ) {
-
             ShimmerImage(
-                imageUrl = Constant.foodItems[it].imageUrl,
+                imageUrl = foodItem.imageUrl,
                 placeholderResId = R.drawable.image_not_available,
+                border = Border(
+                    width = 1.dp,
+                    color = Color.LightGray,
+                    shape = RoundedCornerShape(8.dp)
+                ),
                 modifier = Modifier
                     .size(80.dp)
                     .clip(RoundedCornerShape(8.dp))
@@ -492,21 +504,23 @@ fun ListFood(it: Int) {
 
             Column {
                 Text(
-                    text = Constant.foodItems[it].name,
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    text = foodItem.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "${Constant.foodItems[it].deliveryTime} mins |",
+                        text = "${foodItem.deliveryTime} mins |",
                         fontSize = 11.sp
                     )
                     Text(
-                        text = " ${Constant.foodItems[it].distance} km | ",
+                        text = " ${foodItem.distance} km | ",
                         fontSize = 11.sp
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -517,7 +531,7 @@ fun ListFood(it: Int) {
                             tint = primaryColor
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "${Constant.foodItems[it].rating}", fontSize = 11.sp)
+                        Text(text = "${foodItem.rating}", fontSize = 11.sp)
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -533,6 +547,7 @@ fun ListFood(it: Int) {
         }
     }
 }
+
 
 @Composable
 fun ArticleItem(
@@ -554,7 +569,10 @@ fun ArticleItem(
                         color = Color.LightGray,
                         shape = RoundedCornerShape(8.dp)
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+
                 )
             }
 
@@ -569,7 +587,7 @@ fun Modifier.shimmerBackground(
     shape: Shape = RoundedCornerShape(8.dp)
 ): Modifier = composed {
 
-    val transition = rememberInfiniteTransition()
+    val transition = rememberInfiniteTransition(label = "")
     lateinit var brush: Brush
     val shimmerColors = listOf(
         Color.LightGray.copy(alpha = 0.6f),
@@ -581,7 +599,7 @@ fun Modifier.shimmerBackground(
         targetValue = targetValue,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 800), repeatMode = RepeatMode.Reverse
-        )
+        ), label = ""
     )
     brush = if (showShimmer) {
         linearGradient(
@@ -613,16 +631,16 @@ fun ShimmerImage(
     val showShimmer = remember { mutableStateOf(false) }
     showShimmer.value = painter.state is AsyncImagePainter.State.Loading
 
-    val imageModifier = if (border != null) {
+    val imageModifier = if (showShimmer.value || painter.state is AsyncImagePainter.State.Error) {
         modifier
             .shimmerBackground(showShimmer = showShimmer.value)
             .fillMaxWidth()
             .border(
-                width = border.width,
-                color = border.color,
-                shape = border.shape ?: RoundedCornerShape(0.dp)
+                width = border?.width ?: 0.dp,
+                color = border?.color ?: Transparent,
+                shape = border?.shape ?: RoundedCornerShape(0.dp)
             )
-            .clip(border.shape ?: RoundedCornerShape(0.dp))
+            .clip(border?.shape ?: RoundedCornerShape(0.dp))
     } else {
         modifier
             .shimmerBackground(showShimmer = showShimmer.value)
@@ -637,6 +655,7 @@ fun ShimmerImage(
         modifier = imageModifier
     )
 }
+
 
 @Composable
 fun NotificationItem(
