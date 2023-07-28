@@ -4,6 +4,7 @@ import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.example.penjualanmakanan.network.ApiServices
+import com.example.penjualanmakanan.repository.DataStoreRepository
 import com.example.penjualanmakanan.utils.Constant
 import dagger.Module
 import dagger.Provides
@@ -57,4 +58,8 @@ object HiltModules {
             .build()
             .create(ApiServices::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideDataStoreRepository(@ApplicationContext context: Context) = DataStoreRepository(context = context)
 }

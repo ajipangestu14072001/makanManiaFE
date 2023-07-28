@@ -12,7 +12,7 @@ import com.example.penjualanmakanan.model.MenuProfile
 import com.example.penjualanmakanan.model.Notification
 
 object Constant {
-    const val BASE_URL = "https://newsapi.org/v2/"
+    const val BASE_URL = "https://64c9-101-255-119-166.ngrok-free.app"
     const val API_KEY = "dd94649ecd254b8ca7c26800a5cbb3b6"
 
     private val appIcons = Icons.Rounded

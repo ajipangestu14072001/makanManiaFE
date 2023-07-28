@@ -1,5 +1,6 @@
 package com.example.penjualanmakanan.view.login
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,12 +21,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -35,6 +40,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -43,6 +49,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.penjualanmakanan.R
 import com.example.penjualanmakanan.navigation.Screen
+import com.example.penjualanmakanan.repository.DataStoreRepository
 import com.example.penjualanmakanan.ui.theme.primaryColor
 import com.example.penjualanmakanan.ui.theme.secondaryColor
 import com.example.penjualanmakanan.utils.DefaultSpacer
@@ -51,13 +58,21 @@ import com.example.penjualanmakanan.utils.buttonColor
 import com.example.penjualanmakanan.utils.buttonModifier
 import com.example.penjualanmakanan.utils.textFieldColor
 import com.example.penjualanmakanan.utils.textFieldModifier
+import com.example.penjualanmakanan.viewmodel.AuthViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(
+    navController: NavHostController,
+    authViewModel: AuthViewModel = hiltViewModel()
+    ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordOpen by remember { mutableStateOf(false) }
-
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val dataStore = DataStoreRepository(context)
+    val state by authViewModel.state.collectAsState()
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -173,7 +188,13 @@ fun LoginScreen(navController: NavHostController) {
         }
         Button(
             onClick = {
-                navController.navigate(Screen.Main.route)
+                scope.launch {
+                    authViewModel.getLogin(username = email, password = password)
+                    if (state.result != null){
+                      navController.navigate(Screen.Main.route)
+                        dataStore.saveToken(name = state.result?.data!!.accessToken)
+                    }
+                }
             },
             modifier = Modifier
                 .buttonModifier()
@@ -184,6 +205,7 @@ fun LoginScreen(navController: NavHostController) {
         ) {
             Text(text = "Log In")
         }
+
 
         OutlinedButton(
             onClick = {

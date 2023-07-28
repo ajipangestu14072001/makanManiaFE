@@ -45,7 +45,7 @@ fun NavController(
         }
 
         composable(route = Screen.Register.route) {
-            RegisterScreen()
+            RegisterScreen(navHostController = navController)
         }
 
         composable(route = Screen.CompleteRegister.route) {
